@@ -298,11 +298,11 @@ def draw(source, target=[], s_line=[], t_line=[], label_line=[], other_lines=[],
     for other_line in other_lines:
         
         if len(other_line)>0:
-            image = draw_line(image, c2p(other_line), color=(3, 107, 252), width=2)
+            image = draw_line(image, c2p(other_line), color=(121, 5, 171), width=2)
 
             # Draw circle in end points
-            image = cv2.circle(image, c2p([other_line[0]])[0], 5, (3, 107, 252), -1)
-            image = cv2.circle(image, c2p([other_line[-1]])[0], 5, (3, 107, 252), -1)
+            image = cv2.circle(image, c2p([other_line[0]])[0], 5, (37, 133, 3), -1)
+            image = cv2.circle(image, c2p([other_line[-1]])[0], 5, (121, 5, 171), -1)
 
     if len(label_line) > 0:
     
@@ -335,15 +335,6 @@ def draw(source, target=[], s_line=[], t_lines=[], label_line=[], other_lines=[]
     # Coordinate to pixel convert function
     c2p = lambda line: [ ( int((p[0] - min_x)*ratio), int((p[1] - min_y)*ratio)) for p in line ] 
 
-    for other_line in other_lines:
-        
-        if len(other_line)>0:
-            image = draw_line(image, c2p(other_line), color=(3, 107, 252), width=2)
-
-            # Draw circle in end points
-            image = cv2.circle(image, c2p([other_line[0]])[0], 5, (3, 107, 252), -1)
-            image = cv2.circle(image, c2p([other_line[-1]])[0], 5, (3, 107, 252), -1)
-
     image = draw_line(image, c2p(source), color=(6, 196, 165), width=3)
     # image = cv2.circle(image, c2p([source[0]])[0], 5, (255, 0, 0), -1)
     # image = cv2.circle(image, c2p([source[-1]])[0], 5, (0, 0, 255), -1)
@@ -352,26 +343,35 @@ def draw(source, target=[], s_line=[], t_lines=[], label_line=[], other_lines=[]
 
     image = draw_line(image, c2p(target), color=(237, 17, 75), width=3)
 
+    
+   
+    if len(s_line)>0:
+        image = draw_line(image, c2p(s_line), color=(120, 145, 4), width=2)
+        image = cv2.circle(image, c2p([s_line[0]])[0], 5, (120, 145, 4), -1)
+        image = cv2.circle(image, c2p([s_line[-1]])[0], 5, (120, 145, 4), -1)
+
    
 
     for t_line in t_lines:
-        image = draw_line(image, c2p(t_line), color=(121, 4, 189), width=2)
+        image = draw_line(image, c2p(t_line), color=(230, 11, 150), width=2)
 
-        image = cv2.circle(image, c2p([t_line[0]])[0], 5, (121, 4, 189), -1)
-        image = cv2.circle(image, c2p([t_line[-1]])[0], 5, (121, 4, 189), -1)
+        image = cv2.circle(image, c2p([t_line[0]])[0], 5, (230, 11, 150), -1)
+        image = cv2.circle(image, c2p([t_line[-1]])[0], 5, (230, 11, 150), -1)
+
+    for other_line in other_lines:
+        
+        if len(other_line)>0:
+            image = draw_line(image, c2p(other_line), color=(121, 5, 171), width=2)
+
+            # Draw circle in end points
+            image = cv2.circle(image, c2p([other_line[0]])[0], 5, (37, 133, 3), -1)
+            image = cv2.circle(image, c2p([other_line[-1]])[0], 5, (121, 5, 171), -1)
 
     if len(label_line) > 0:
     
-        image = draw_line(image, c2p(label_line), color=(120, 145, 4), width=2)
-        image = cv2.circle(image, c2p([label_line[0]])[0], 5, (120, 145, 4), -1)
-        image = cv2.circle(image, c2p([label_line[-1]])[0], 5, (120, 145, 4), -1)
-
-
-    if len(s_line)>0:
-        image = draw_line(image, c2p(s_line), color=(31, 13, 224), width=2)
-        image = cv2.circle(image, c2p([s_line[0]])[0], 5, (31, 13, 224), -1)
-        image = cv2.circle(image, c2p([s_line[-1]])[0], 5, (31, 13, 224), -1)
-
+        image = draw_line(image, c2p(label_line), color=(31, 13, 224), width=2)
+        image = cv2.circle(image, c2p([label_line[0]])[0], 5, (31, 13, 224), -1)
+        image = cv2.circle(image, c2p([label_line[-1]])[0], 5, (31, 13, 224), -1)
 
     
 
@@ -396,7 +396,7 @@ def draw_string(image, text, location):
     color = (255, 0, 0)
     thickness = 1
 
-    image = cv2.putText(image, text, location, font, fontScale, color, thickness, cv2.LINE_AA)
+    image = cv2.putText(image, text, location, font, fontScale, color, thickness, cv2.LINE_AA )
 
     return image
 
@@ -467,7 +467,7 @@ def draw_with_scores(source, target=[], s_line=[], t_line=[], label_line=[], oth
 def draw_scores(center, scores=[], locations=[], image=None, img_size=1024):
     
     if image is None:
-        image = np.full((img_size, img_size, 3), 0, dtype='uint8')
+        image = np.full((img_size, img_size, 3), 255, dtype='uint8')
 
     ratio = 8
     center_x, center_y = center
@@ -1289,8 +1289,7 @@ def closest_line(lines, traj):
     points = [ Point(p) for p in traj]
     distances = [ np.average([ line.distance(p) for p in points]) for line in lines ]
 
-    return min( range(len(lines)), key=lambda k: distances[k])
-
+    return min( range(len(lines)), key=lambda k: distances[k])   
 
 
 

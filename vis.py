@@ -5,17 +5,9 @@ import cv2
 from argoverse.map_representation.map_api import ArgoverseMap
 avm = ArgoverseMap()
 
-input_file = "val_results.pkl"
+input_file = "result_pickle_final_test.pkl"
 
-output_file = "vis/gp_results/%d.jpg"
-
-def curv(line):
-
-    ref = LineString([line[0], line[-1]])
-    
-    vector = np.asarray( [ ref.distance(Point(p)) for p in line] )
-    
-    return np.std(vector)
+output_file = "vis/results_2/%d.jpg"
 
 
 data = load_pickle(input_file)
@@ -24,40 +16,46 @@ for i in tqdm(range(len(data))):
 
     rec = data[i]
 
-    source = rec["source_trj"]
-    target = rec["target_trj"]
+    source = rec["source"]
+    # target = rec["target"]
 
-    ref_lanes = rec["candidate_cl"]
-    length = len(ref_lanes)
+    candidate_count = int(rec["num_cand"].item())
+    if candidate_count==0:
+        print(0)
+
     city = rec["city"]
-    scores = rec["gp_result"]
-    label = rec["label"]
+    
+    candidate_lanes = rec["ref_lane"].tolist()[:candidate_count]
+    scores = rec["gp_result"][:candidate_count]
 
+    predictions = rec["prediction"][:candidate_count]
+
+    
+
+    # Scores and locations
+    score_strings = []
+    locations = []
+
+    for score, lane in zip(scores[: len(candidate_lanes)], candidate_lanes):
+        score_strings.append("%.2f"%score)
+        locations.append(lane[-1])
+
+
+    # Select with biggest score
     index = np.argmax(scores)
-    other_lines = ref_lanes[:index] + ref_lanes[index+1:]
-    label_line = ref_lanes[index]
 
-    # print(curv(label_line))
+    ref_lane = candidate_lanes[index]
 
-    if label==index and curv(label_line)>=5:
+    del candidate_lanes[index]
 
-        # Scores and locations
-        score_strings = []
-        locations = []
 
-        for score, lane in zip(scores[: length], ref_lanes):
-            score_strings.append("%.2f"%score)
-            locations.append(lane[-1])
+    image = draw_map(avm, source[-1], city)
 
-            
+    image = draw_2(source, s_line=ref_lane, t_lines=candidate_lanes, other_lines=predictions, image=image)
 
-        image = draw_map(avm, source[-1], city)
+    image = draw_scores(source[-1], scores=score_strings, locations=locations, image=image)
 
-        image = draw(source, target, s_line=label_line, image=image, other_lines=other_lines)
+    # image = cv2.flip(image, 1)
 
-        image = draw_scores(source[-1], scores=score_strings, locations=locations, image=image)
-
-        # image = cv2.flip(image, 1)
-
-        cv2.imwrite(output_file%(i+1), image)
+    cv2.imwrite(output_file%(i+1), image)
 

@@ -28,13 +28,13 @@ import pdb
 
 from copy import copy
 
-root_dir = "/mnt/Data/dataset/argoverse/test"
+root_dir = "dataset/test"
 from argoverse.data_loading.argoverse_forecasting_loader import ArgoverseForecastingLoader
 loader = ArgoverseForecastingLoader(root_dir)
 
 
 # Output
-output_file = "output/multi_candidate/v3/test.pkl"
+output_file = "output/v_4/test.pkl"
  
 print("[INFO]Loading Map...")
 avm = ArgoverseMap()
@@ -78,8 +78,12 @@ def thread_run(recs, label):
         # Candidates
         candidate_cl, _ = get_candidate_centerlines(avm, source, city)
 
-        # Ground truth
-        # label = sorted(range(len(candidate_cl)), key=lambda k: ( LineString(candidate_cl[k]).distance(Point(target[-1])), hausdorffDistance(target, candidate_cl[k].tolist()) ))[0]
+
+        if len(candidate_cl)==0:
+            print("[INFO] Zero candidates")
+
+        # # Ground truth
+        # label = closest_line(candidate_cl, target)
 
         
         ret.append( { "id": id, "city" : city, "source_trj": source, "candidate_cl": candidate_cl
@@ -92,7 +96,7 @@ def thread_run(recs, label):
 
 # thread_run(recs, "output/multi_candidate/v2/train.pkl")
 
-n_jobs = 8
+n_jobs = 10
 batch_size = ceil(length/n_jobs)
 
 ret = Parallel(n_jobs=n_jobs)(delayed(thread_run)(recs[i*batch_size: (i+1)*batch_size], "%d"%(i+1)) for i in range(ceil(length/batch_size) ))
