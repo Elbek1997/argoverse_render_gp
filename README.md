@@ -13,5 +13,11 @@ Main functionality is inside thread_run function
 ### utils.py
 Utility tools for processing
 
+### Getting candidate lanes
+```get_candidate_centerlines```
+
+### Selecting ground truth
+```closest_line```
+
 
 
