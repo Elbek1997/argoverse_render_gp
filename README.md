@@ -16,6 +16,9 @@ Utility tools for processing
 ### Getting candidate lanes
 ```get_candidate_centerlines```
 
+### Unify Line
+```unify_line```
+
 ### Selecting ground truth
 ```closest_line```
 
