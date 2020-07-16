@@ -1292,6 +1292,90 @@ def closest_line(lines, traj):
     return min( range(len(lines)), key=lambda k: distances[k])   
 
 
+#region Unify line
+
+def unify_line(line, point_count):
+    """Make line unified
+
+    :param line: given line
+    
+    :param point_count: number of points
+    """
+
+    # Return array
+    ret = np.zeros(shape=(point_count, 2), dtype="float32")
+
+    line = np.asarray(line)
+    # Line distance
+    line_dist = line_distance(line)
+
+    # Distance per segment
+    segment_dist = line_dist/(point_count-1)
+
+    # Current distance
+    curr_dist = segment_dist
+
+    # Copy first point as it is
+    ret[0] = line[0]
+
+    # Current point
+    curr_point = line[0]
+
+    # Current index for ret array
+    ret_index = 1
+
+    # Current index in line
+    i = 1
+
+    # Loop point_count-1 times
+    while ret_index < point_count - 1:
+
+        # Distance
+        dist = distance(curr_point, line[i])
+
+        if dist != 0:
+
+            if dist >= curr_dist:
+
+                # Displacement vector
+                disp_vector = line[i] - curr_point
+
+                # Ratio of distances
+                ratio = curr_dist/dist
+
+                # Calculate curr_point
+                curr_point = curr_point + disp_vector*ratio
+
+                # Add curr_point to ret
+                ret[ret_index] = curr_point
+                
+                ret_index = ret_index + 1
+
+                # Update curr_distance
+                curr_dist = segment_dist
+
+            else :
+                # Update distance
+                curr_dist = curr_dist - dist
+
+                # Update curr_point and i
+                curr_point = line[i]
+                i = min( i+1, len(line.size())-1 )
+
+        else :
+
+            i = min( i+1, len(line)-1)
+    
+    # Copy last point as it is
+    ret[point_count - 1] = line[-1]
+    
+
+    return ret
+    
+
+#endregion
+
+
 
 
 def get_candidate_centerlines(avm, traj, city_name):
